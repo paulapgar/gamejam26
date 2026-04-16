@@ -7,8 +7,11 @@ import { MyLevel } from "./level";
 const game = new Engine({
   width: 800, // Logical width and height in game pixels
   height: 600,
-  displayMode: DisplayMode.FitScreenAndFill, // Display mode tells excalibur how to fill the window
+  //displayMode: DisplayMode.FitScreenAndFill, // Display mode tells excalibur how to fill the window
+  displayMode: DisplayMode.FitScreenAndZoom, // Display mode tells excalibur how to fill the window
   pixelArt: true, // pixelArt will turn on the correct settings to render pixel art without jaggies or shimmering artifacts
+  pixelRatio: 1,
+  backgroundColor: Color.Black,
   scenes: {
     start: MyLevel
   },
@@ -19,7 +22,8 @@ const game = new Engine({
   // fixedUpdateTimestep: 16 // Turn on fixed update timestep when consistent physic simulation is important
 });
 
-game.start('start', { // name of the start scene 'start'
+// name of the start scene 'start'
+game.start('start', {
   loader, // Optional loader (but needed for loading images/sounds)
   inTransition: new FadeInOut({ // Optional in transition
     duration: 1000,

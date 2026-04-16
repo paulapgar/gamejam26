@@ -1,15 +1,23 @@
-import { DefaultLoader, Engine, ExcaliburGraphicsContext, Scene, SceneActivationContext } from "excalibur";
-import { Player } from "./player";
+import { DefaultLoader, Engine, ExcaliburGraphicsContext, Scene, SceneActivationContext, vec } from "excalibur";
+
+import { runRightAnim } from "./resources";
+import { Bot } from "./bot";
 
 export class MyLevel extends Scene {
     override onInitialize(engine: Engine): void {
         // Scene.onInitialize is where we recommend you perform the composition for your game
-        const player = new Player();
-        this.add(player); // Actors need to be added to a scene to be drawn
+        //const player = new Player();
+        //this.add(player); // Actors need to be added to a scene to be drawn
+
+        const bot = new Bot();
+        bot.graphics.use(runRightAnim);
+        bot.pos = vec(20,20);
+        this.add(bot);
+
     }
 
     override onPreLoad(loader: DefaultLoader): void {
-        // Add any scene specific resources to load
+        // Add any scene specific RESOURCE to load
     }
 
     override onActivate(context: SceneActivationContext<unknown>): void {
