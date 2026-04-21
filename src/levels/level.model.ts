@@ -1,5 +1,5 @@
 import { Sprite } from "excalibur";
-import { TileKind, TILE_DEFS, BKG_TILE_DEFS, LEVEL_TILE_DEFS } from "../resources";
+import { TileKind, TILE_DEFS, LEVEL_TILE_DEFS } from "../resources";
 
 export type LevelGrid = TileKind[][];
 
@@ -18,76 +18,6 @@ export function getTileChar(charMap: string[], posX: number, posY: number): stri
   return row.charAt(posX);
 }
 
-export function getBkgTileSprite(tileChar: string | undefined): Sprite {
-    let spr: Sprite;
-
-    if (!tileChar) {
-        return BKG_TILE_DEFS.unknown;
-    }
-
-    switch (tileChar) {
-          case "_":
-            spr = BKG_TILE_DEFS.topBorder;
-            break;
-          case "|":
-            spr = BKG_TILE_DEFS.leftBorder;
-            break;
-          case "l":
-            spr = BKG_TILE_DEFS.rightBorder;
-            break;
-          case "=":
-            spr = BKG_TILE_DEFS.middleHorizontal;
-            break;
-          case ">":
-            spr = BKG_TILE_DEFS.leftT;
-            break;
-          case "<":
-            spr = BKG_TILE_DEFS.rightT;
-            break;
-          case "-":
-            spr = BKG_TILE_DEFS.bottomBorder;
-            break;
-          case ".":
-            spr = BKG_TILE_DEFS.topLeftBorder;
-            break;
-          case ",":
-            spr = BKG_TILE_DEFS.topRightBorder;
-            break;
-          case "`":
-            spr = BKG_TILE_DEFS.bottomLeftBorder;
-            break;
-          case "/":
-            spr = BKG_TILE_DEFS.bottomRightBorder;
-            break;
-          case " ":
-            spr = BKG_TILE_DEFS.black;
-            break;
-          default:
-            spr = BKG_TILE_DEFS.unknown;
-            break;
-        }
-    return spr;
-}
-
-export const BACKGROUND_TILES: string[] = [
-  '.__________,        ',
-  '|          l        ',
-  '|          l        ',
-  '|          l        ',
-  '|          l        ',
-  '|          l        ',
-  '|          l        ',
-  '|          l        ',
-  '|          l        ',
-  '|          l        ',
-  '|          l        ',
-  '>==========<        ',
-  '|          l        ',
-  '|          l        ',
-  '`----------/        ',
-];
-
-
 export function getLevelTileSprite(tileChar: string | undefined): Sprite {
     let spr: Sprite;
 
@@ -101,6 +31,12 @@ export function getLevelTileSprite(tileChar: string | undefined): Sprite {
             break;
         case 'w':
             spr = LEVEL_TILE_DEFS.wall;
+            break;
+        case 'e':
+            spr = LEVEL_TILE_DEFS.enter;
+            break;
+        case 'x':
+            spr = LEVEL_TILE_DEFS.exit;
             break;
         default:
             spr = LEVEL_TILE_DEFS.unknown;
@@ -125,13 +61,13 @@ export const LEVEL_TEMPLATE_TILES: string[] = [
 
 export const LEVEL1_TILES: string[] = [
   'wwwwwwwwww',
+  'wew......w',
   'w.w......w',
+  'w.www....w',
   'w........w',
-  'w........w',
-  'w........w',
-  'w........w',
-  'w........w',
-  'w........w',
-  'w........w',
+  'w....w...w',
+  'w....ww..w',
+  'w.....w..w',
+  'w.....w.xw',
   'wwwwwwwwww',
 ];

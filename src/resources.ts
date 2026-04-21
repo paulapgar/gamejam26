@@ -1,8 +1,10 @@
-import { Animation, ImageSource, Loader, SpriteSheet, Sprite } from "excalibur";
+import { Animation, ImageSource, Loader, SpriteSheet, Sprite, FontSource, Color, vec } from "excalibur";
 
 // It is convenient to put your RESOURCE in one place
 export const RESOURCES = {
   spriteSheet: new ImageSource("./images/spritesheet.png"),
+  background: new ImageSource("./images/background.png"),
+  fontRetroGaming: new FontSource("./fonts/Retro Gaming.ttf", "Retro")
 } as const; // the 'as const' is a neat typescript trick to get strong typing on your RESOURCE.
 // So when you type RESOURCE.Sword -> ImageSource
 
@@ -12,6 +14,18 @@ export const loader = new Loader();
 for (const res of Object.values(RESOURCES)) {
   loader.addResource(res);
 }
+
+export const gameFont = RESOURCES.fontRetroGaming.toFont({
+  family: 'Retro',
+  color: Color.White,
+  size: 16,
+  shadow: {
+    offset: vec(4,4),
+    color: Color.Black
+  }
+});
+
+export const bkgSprite = Sprite.from(RESOURCES.background)
 
 const mainSheet = SpriteSheet.fromImageSource({
   image: RESOURCES.spriteSheet,
@@ -80,22 +94,6 @@ export const TILE_DEFS: Record<TileKind, TileDef> = {
   start: { kind: 'start', passable: true,  sprite: mainSheet.getSprite(1, 3), isStart: true },
   exit:  { kind: 'exit',  passable: true,  sprite: mainSheet.getSprite(0, 3), isExit: true },
 };
-
-export const BKG_TILE_DEFS: Record<string, Sprite> = {
-  topLeftBorder: mainSheet.getSprite(0,4),
-  topRightBorder: mainSheet.getSprite(1,4),
-  bottomLeftBorder: mainSheet.getSprite(0,5),
-  bottomRightBorder: mainSheet.getSprite(1,5),
-  topBorder: mainSheet.getSprite(2,4),
-  bottomBorder: mainSheet.getSprite(2,5),
-  leftBorder: mainSheet.getSprite(0,6),
-  rightBorder: mainSheet.getSprite(1,6),
-  rightT: mainSheet.getSprite(3,6),
-  leftT: mainSheet.getSprite(2,6),
-  middleHorizontal: mainSheet.getSprite(3,4),
-  unknown: mainSheet.getSprite(0,7),
-  black: mainSheet.getSprite(1,7),
-}
 
 export const LEVEL_TILE_DEFS: Record<string, Sprite> = {
   floor: mainSheet.getSprite(0,2),

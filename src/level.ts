@@ -7,10 +7,16 @@ import {
   vec,
   TileMap,
   Sprite,
+  Actor,
+  Label,
 } from "excalibur";
-import { BKG_TILE_DEFS, LEVEL_TILE_DEFS } from "./resources";
+import { LEVEL_TILE_DEFS, bkgSprite, gameFont } from "./resources";
 
-import { getTileChar, BACKGROUND_TILES, getBkgTileSprite, LEVEL1_TILES, getLevelTileSprite } from "./levels/level.model";
+import {
+  getTileChar,
+  LEVEL1_TILES,
+  getLevelTileSprite,
+} from "./levels/level.model";
 
 import { Bot } from "./bot";
 
@@ -27,58 +33,39 @@ export class MyLevel extends Scene {
     bot.pos = vec(100, 100);
     this.add(bot);
 
+    // add background sprite as an Actor at pos(0,0) with anchor(0,0)
+    const background = new Actor({
+      pos: vec(0, 0),
+      anchor: vec(0, 0),
+      width: 800,
+      height: 600,
+      z: -100,
+    });
+    background.graphics.use(bkgSprite);
+    this.add(background);
+
     // Create a 10x10 TileMap using the `floor` sprite (40x40 tiles)
     const tileSize = 40;
 
-    const bkgTileMap = new TileMap({
-      pos: vec(0, 0),
-      tileWidth: tileSize,
-      tileHeight: tileSize,
-      rows: 15,
-      columns: 20,
-    });
-
-    // ensure tilemap renders behind actors
-    bkgTileMap.z = -100;
-
-    for (let ty = 0; ty < 15; ty++) {
-      for (let tx = 0; tx < 20; tx++) {
-        const tileChar = getTileChar(BACKGROUND_TILES, tx, ty);
-        let spr: Sprite = getBkgTileSprite(tileChar);
-
-        const tileRef = bkgTileMap.getTile(tx, ty);
-        // Don't bother filling in the blank/black tiles
-        if (tileRef  && spr != BKG_TILE_DEFS.black) {
-          tileRef.addGraphic(spr);
-        }
-      }
-    }
-
-    this.add(bkgTileMap);
-
-    const levelTileMap = new TileMap({
-      pos: vec(tileSize*1, tileSize*1),
+    this.levelTileMap = new TileMap({
+      pos: vec(tileSize * 1, tileSize * 1),
       tileWidth: tileSize,
       tileHeight: tileSize,
       rows: 10,
       columns: 10,
     });
 
-    levelTileMap.z = -50
-    for (let ty = 0; ty < 10; ty++) {
-      for (let tx = 0; tx < 10; tx++) {
-        const tileChar = getTileChar(LEVEL1_TILES, tx, ty);
-        let spr: Sprite = getLevelTileSprite(tileChar);
+    this.add(this.levelTileMap);
 
-        const tileRef = levelTileMap.getTile(tx, ty);
-        // Don't bother filling in the blank/black tiles
-        if (tileRef  && spr != LEVEL_TILE_DEFS.black) {
-          tileRef.addGraphic(spr);
-        }
-      }
-    }
-    this.add(levelTileMap);
+    this.levelTileMap.z = -50;
 
+    const testLabel = new Label({
+      text: "Testing what the font\nLOOKS LIKE",
+      pos: vec(100, 100),
+      font: gameFont,
+    });
+
+    this.add(testLabel);
   }
 
   override onPreLoad(_loader: DefaultLoader): void {
@@ -88,6 +75,18 @@ export class MyLevel extends Scene {
   override onActivate(_context: SceneActivationContext<unknown>): void {
     // Called when Excalibur transitions to this scene
     // Only 1 scene is active at a time
+    for (let ty = 0; ty < 10; ty++) {
+      for (let tx = 0; tx < 10; tx++) {
+        const tileChar = getTileChar(LEVEL1_TILES, tx, ty);
+        let spr: Sprite = getLevelTileSprite(tileChar);
+
+        const tileRef = this.levelTileMap.getTile(tx, ty);
+        // Don't bother filling in the blank/black tiles
+        if (tileRef && spr != LEVEL_TILE_DEFS.black) {
+          tileRef.addGraphic(spr);
+        }
+      }
+    }
   }
 
   override onDeactivate(_context: SceneActivationContext): void {
