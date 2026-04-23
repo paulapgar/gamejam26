@@ -59,6 +59,39 @@ export const animRunLeft = Animation.fromSpriteSheetCoordinates({
   ],
 });
 
+export const animRunUp = Animation.fromSpriteSheetCoordinates({
+  spriteSheet: mainSheet,
+  durationPerFrameMs: 250,
+  frameCoordinates: [
+    { x: 6, y: 0 },
+    { x: 7, y: 0 },
+    { x: 6, y: 0 },
+    { x: 8, y: 0 },
+  ],
+});
+
+export const animRunDown = Animation.fromSpriteSheetCoordinates({
+  spriteSheet: mainSheet,
+  durationPerFrameMs: 250,
+  frameCoordinates: [
+    { x: 11, y: 0 },
+    { x: 10, y: 0 },
+    { x: 11, y: 0 },
+    { x: 9, y: 0 },
+  ],
+});
+
+export const animDance = Animation.fromSpriteSheetCoordinates({
+  spriteSheet: mainSheet,
+  durationPerFrameMs: 250,
+  frameCoordinates: [
+    { x: 11, y: 0 },
+    { x: 12, y: 0 },
+    { x: 11, y: 0 },
+    { x: 13, y: 0 },
+  ],
+});
+
 export const animStandLeft = Animation.fromSpriteSheetCoordinates({
   spriteSheet: mainSheet,
   durationPerFrameMs: 250,
@@ -75,6 +108,23 @@ export const animStandRight = Animation.fromSpriteSheetCoordinates({
   ],
 });
 
+export const animStandUp = Animation.fromSpriteSheetCoordinates({
+  spriteSheet: mainSheet,
+  durationPerFrameMs: 250,
+  frameCoordinates: [
+    { x: 6, y: 0 },
+  ],
+});
+
+export const animStandDown = Animation.fromSpriteSheetCoordinates({
+  spriteSheet: mainSheet,
+  durationPerFrameMs: 250,
+  frameCoordinates: [
+    { x: 11, y: 0 },
+  ],
+});
+
+
 
 // Tile definitions consolidated into a single registry
 export type TileKind = 'floor' | 'wall1' | 'start' | 'exit';
@@ -88,18 +138,22 @@ export interface TileDef {
   metadata?: Record<string, unknown>;
 }
 
-export const TILE_DEFS: Record<TileKind, TileDef> = {
-  floor: { kind: 'floor', passable: true,  sprite: mainSheet.getSprite(0, 2) },
-  wall1: { kind: 'wall1', passable: false, sprite: mainSheet.getSprite(1, 2) },
-  start: { kind: 'start', passable: true,  sprite: mainSheet.getSprite(1, 3), isStart: true },
-  exit:  { kind: 'exit',  passable: true,  sprite: mainSheet.getSprite(0, 3), isExit: true },
-};
+export const LEVEL_TILE_SPRITE: Record<string, Sprite> = {
+  "floor": mainSheet.getSprite(0,2),
+  "wall": mainSheet.getSprite(1,2),
+  "exit": mainSheet.getSprite(0,3),
+  "enter": mainSheet.getSprite(1,3),
+  "unknown": mainSheet.getSprite(0,7),
+  "black": mainSheet.getSprite(1,7),
+  "tokentray": mainSheet.getSprite(2,7),
+  "tokenactive": mainSheet.getSprite(3,7),
+}
 
-export const LEVEL_TILE_DEFS: Record<string, Sprite> = {
-  floor: mainSheet.getSprite(0,2),
-  wall: mainSheet.getSprite(1,2),
-  exit: mainSheet.getSprite(0,3),
-  enter: mainSheet.getSprite(1,3),
-  unknown: mainSheet.getSprite(0,7),
-  black: mainSheet.getSprite(1,7),
+export const TOKEN_SPRITE: Record<string, Sprite> = {
+  "fwd": mainSheet.getSprite(1,8),
+  "fwd2": mainSheet.getSprite(2,8),
+  "fwd3": mainSheet.getSprite(3,8),
+  "fwd4": mainSheet.getSprite(4,8),
+  "tr": mainSheet.getSprite(5,8),
+  "tl": mainSheet.getSprite(6,8),
 }

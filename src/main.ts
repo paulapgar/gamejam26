@@ -1,6 +1,7 @@
 import { Color, DisplayMode, Engine, FadeInOut } from "excalibur";
 import { loader } from "./resources";
 import { MyLevel } from "./level";
+import { LEVEL_DATA } from "./models/level.data";
 
 // Goal is to keep main.ts small and just enough to configure the engine
 
@@ -23,13 +24,15 @@ const game = new Engine({
 });
 
 // name of the start scene 'start'
-game.start('start', {
+game.start('root', {
   loader, // Optional loader (but needed for loading images/sounds)
-  inTransition: new FadeInOut({ // Optional in transition
-    duration: 1000,
-    direction: 'in',
-    color: Color.ExcaliburBlue
-  })
 }).then(() => {
-  // Do something after the game starts
+  game.goToScene('start', {
+    sceneActivationData: LEVEL_DATA["Level 1"],
+    destinationIn: new FadeInOut({
+      duration: 1000,
+      direction: 'in',
+      color: Color.ExcaliburBlue
+    })
+  });
 });

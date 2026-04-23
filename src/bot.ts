@@ -7,7 +7,7 @@ import {
   vec,
   Vector,
 } from "excalibur";
-import { animRunLeft, animRunRight, animStandLeft, animStandRight } from "./resources";
+import { animDance, animRunDown, animRunLeft, animRunRight, animRunUp, animStandDown, animStandLeft, animStandRight, animStandUp } from "./resources";
 
 // Actors are the main unit of composition you'll likely use, anything that you want to draw and move around the screen
 // is likely built with an actor
@@ -24,7 +24,7 @@ import { animRunLeft, animRunRight, animStandLeft, animStandRight } from "./reso
 export type Facing = "Up" | "Down" | "Left" | "Right";
 
 export class Bot extends Actor {
-  facing: Facing = "Right";
+  facing: Facing = "Down";
   currentTile: Vector = vec(-1,-1); // x, y of Tiles not pixels  -1,-1 means not set
   targetTile: Vector = vec(-1,-1);  // x, y of Tiles not pixels  -1,-1 means not set
   //carriedItem: Item = undefined;
@@ -32,13 +32,9 @@ export class Bot extends Actor {
 
   constructor() {
     super({
-      // Giving your actor a name is optional, but helps in debugging using the dev tools or debug mode
-      //name: "Gippity",
-      //pos: vec(50, 50),
       width: 40,
       height: 40,
       // anchor: vec(0, 0), // Actors default center colliders and graphics with anchor (0.5, 0.5)
-      // collisionType: CollisionType.Active, // Collision Type Active means this participates in collisions read more https://excaliburjs.com/docs/collisiontypes
     });
   }
 
@@ -64,9 +60,25 @@ export class Bot extends Actor {
                 this.graphics.use(animStandRight);
             }
         break;
+        case "Up":
+            if (this.isMoving()) {
+                this.graphics.use(animRunUp);
+            }
+            else {
+                this.graphics.use(animStandUp);
+            }
+        break;
+        case "Down":
+            if (this.isMoving()) {
+                this.graphics.use(animRunDown);
+            }
+            else {
+                this.graphics.use(animStandDown);
+            }
+        break;
     }
   }
-
+  // turnLeft is going to simply set the animation and graphic for the bot
   turnLeft() {
     switch (this.facing) {
       case "Up":
@@ -87,6 +99,7 @@ export class Bot extends Actor {
     }
   }
 
+  // turnRight is going to simply set the animation and graphic for the bot
   turnRight() {
     switch (this.facing) {
       case "Up":
@@ -107,6 +120,7 @@ export class Bot extends Actor {
     }
   }
 
+  // setMoveForward is going to set the animation for the bot and a moveTo() target
   setMoveForward() {
     this.moving = true;
 
@@ -125,10 +139,40 @@ export class Bot extends Actor {
     }
   }
 
+  // setMoveBlocked is going to set the animation for the bot to "bump" into obstacles
+  setMoveBlocked() {
+    this.moving = true;
+
+    switch (this.facing) {
+        case "Right":
+            break;
+        case "Left":
+            break;
+        case "Up":
+            break;
+        case "Down":
+            break;
+        default:
+            console.log("Error: moveForward, this.facing not set");
+            break;
+    }
+
+  }
+
+  setFacing(facing: Facing) {
+    this.facing = facing;
+  }
+
+  getFacing() : Facing {
+    return this.facing;
+  }
+
   setMoveStop() {
     this.moving = false;
-}
+  }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // Excalibur lifecycle methods
 
   override onInitialize() {
     // Generally recommended to stick logic in the "On initialize"

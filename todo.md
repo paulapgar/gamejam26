@@ -1,0 +1,25 @@
+# Todo List
+
+- [x] LevelData structure to send Level scene
+  - level name
+  - string map for tiles
+  - next level link (when completed level)
+  - size of runnable program allowed (# of tokens placeable)
+  - introduction text panel data (icon, text) ?
+- [ ] structure for running program of tokens
+- [ ] handler for running the program move by move (within Level scene)
+  - affects the bot animation and position
+  - checks environment for actions allowed
+  - checks for win/lose condition (losing is not hitting exit by end of program)
+- [ ] ordered list of tokens to drop
+- [ ] Falling tokens in a certain order but in random columns
+- [ ] Click a falling token to add it to the runnable program
+- [ ] Filling up the "Context Window" box with grayscale(?) smaller tokens
+- [ ] introduction text panel info (when start level)
+- [ ] Title Screen
+- [ ] Switching between scenes / levels
+- [ ] Pause/Resume button
+- [ ] Restart Level button
+- [ ] Exit Level button
+- [ ] Add Switch tile to create bridge
+- [ ] Add Key tile to open locked doors
