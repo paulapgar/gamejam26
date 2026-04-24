@@ -8,7 +8,7 @@ import {
   TileMap,
   Sprite,
   Actor,
-  Entity,
+  Vector,
 } from "excalibur";
 
 import { LEVEL_TILE_SPRITE, TOKEN_SPRITE, bkgSprite } from "./resources";
@@ -20,6 +20,9 @@ import {
 } from "./models/level.model";
 
 import { Bot } from "./bot";
+import { Token } from "./token";
+import { TOKEN_DATA } from "./models/token.data";
+import { TokenType } from "./models/token.model";
 
 const BKG_Z = -100;
 const TILE_Z = -50;
@@ -32,9 +35,80 @@ export class MyLevel extends Scene {
   myLevelData!: LevelData;
   bot: Bot = new Bot();
   levelMode: "intro" | "paused" | "playing" | "running" | "won" | "lost" = "intro";
-  tokenTray: Actor[] = [];
-  tokenTrayPlan: string[] = []; // array of token types in the order they were placed in the tray
+  tokenTray: Token[] = [];
   tokenTrayActive: number = -1; // index of active token in the tray or -1 if no active token
+  tokenTrayActiveOverlay!: Actor; // overlay Actor to show the token graphic of the active token in the tray
+
+  getAvailableTokenTrayIndex(): number {
+    for (let i = 0; i < this.tokenTray.length; i++) {
+      if (this.tokenTray[i].mode === "unused") {
+        return i;
+      }
+    }
+    return -1; // no available slot
+  }
+
+  getNextTileInDirection(pos: Vector, facing: string): Vector {
+    switch (facing) {
+      case "Up":
+        return vec(pos.x, pos.y - 1);
+      case "Down":
+        return vec(pos.x, pos.y + 1);
+      case "Left":
+        return vec(pos.x - 1, pos.y);
+      case "Right":
+        return vec(pos.x + 1, pos.y);
+      default:
+        return pos;
+    }
+  }
+
+  runCommandStep(bot: Bot) {
+    if (bot.isMoving()) return; // wait until bot is done with current move
+
+    // Check the bot's current tile and decide what to do based on that and the next command in the bot's queue
+
+    // This is where the main logic for executing the bot's commands is going to go
+    
+    if (this.tokenTrayActive < 0) {
+      this.tokenTrayActive = 0;
+      this.tokenTrayActiveOverlay.pos = this.tokenTray[this.tokenTrayActive].pos;
+    }
+    let cmd = this.tokenTray[this.tokenTrayActive].pullNextCommand()
+    if (!cmd) {
+      this.tokenTrayActive++;
+      if (this.tokenTrayActive >= this.tokenTray.length) {
+        this.tokenTrayActive = -1; // no more commands to execute
+        // *** Probably die when running out of commands if above check for current tile exit fails
+        // *** DIE
+        // *** Set it to levelMode = "lost" for now
+        this.levelMode = "lost";
+      } else {
+        // update the position of the active token in the tray
+        this.tokenTrayActiveOverlay.pos = this.tokenTray[this.tokenTrayActive].pos;
+      }
+    }
+    else {
+      switch (cmd) {
+        case "fwd":
+          const nextTile = this.getNextTileInDirection(bot.currentTile, bot.facing);
+          // Need to do some checking nextTile(TYPE) here and call setMoveBlocked()
+          // *** testing ***
+          this.bot.targetTile = nextTile;
+          this.bot.setMoveForward();
+          break;
+        case "tr":
+          this.bot.turnRight();
+          break;
+        case "tl":
+          this.bot.turnLeft();
+          break;
+        }
+      }       
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Excalibur lifecycle methods
 
   override onInitialize(_engine: Engine): void {
     // Scene.onInitialize is where we recommend you perform the composition for your game
@@ -68,18 +142,21 @@ export class MyLevel extends Scene {
     this.add(this.levelTileMap);
     this.levelTileMap.z = TILE_Z;
 
-    // Initialize the token tray with Actors for the spaces based on number of tokens allowed in level
-    for (let x = 0; x < 20; x++) {
-      this.tokenTray[x] = new Actor();
-      this.tokenTray[x].graphics.use(LEVEL_TILE_SPRITE.black);
-      this.tokenTray[x].pos = vec(-100, -100); // start off screen until we set them properly in onActivate
-      this.tokenTray[x].z = TILE_Z;
-      this.add(this.tokenTray[x]);
+    // Initialize the token tray with Actors for the spaces
+    for (let i = 0; i < 20; i++) {
+      this.tokenTray[i] = new Token();
+      this.tokenTray[i].graphics.use(LEVEL_TILE_SPRITE.black);
+      this.tokenTray[i].pos = vec(-100, -100); // start off screen until we set them properly in onActivate
+      this.tokenTray[i].z = TILE_Z;
+      this.tokenTray[i].mode = "unused";
+      this.add(this.tokenTray[i]);
     }
 
-    const token = new Actor({ pos: vec(12 * 40 + 20, 20) });
-    token.graphics.use(TOKEN_SPRITE.fwd2);
-    this.add(token);
+
+    this.tokenTrayActiveOverlay = new Actor({ pos: vec(-100, -100) });
+    this.tokenTrayActiveOverlay.graphics.use(LEVEL_TILE_SPRITE.tokenactive);
+    this.tokenTrayActiveOverlay.z = TILE_Z + 10; // make sure it is above the token tray spaces
+    this.add(this.tokenTrayActiveOverlay);
 
     // const testLabel = new Label({
     //   text: "FWD",
@@ -126,22 +203,14 @@ export class MyLevel extends Scene {
       }
     }
 
-    // Clear the token tray area and add tokens based on the level data
-    for (let tx = 1; tx < 11; tx++) {
-      for (let ty = 11; ty < 13; ty++) {
-        const tileRef = this.levelTileMap.getTile(tx, ty);
-        if (tileRef) {
-          tileRef.clearGraphics();
-        }
-      }
-    }
-
-    for (let i = 0; i < this.myLevelData.numTokens; i++) {
+    for (let i = 0; i < 20; i++) {
       this.tokenTray[i].graphics.use(LEVEL_TILE_SPRITE.black);
       this.tokenTray[i].pos = vec(-100, -100); // start off screen until we set them properly below
       this.tokenTray[i].z = TILE_Z;
     }
 
+    // Now we build up the tray based on the numTokens for the level
+    // Fugly code ...
     let j = 12;
     let row = 0;
     if (this.myLevelData.numTokens > 10) {
@@ -153,25 +222,106 @@ export class MyLevel extends Scene {
       j++;
       row = 1;
     }
-    for (let i = row*10; i < (row*10)+(this.myLevelData.numTokens % 10); i++) {
-        this.tokenTray[i].graphics.use(LEVEL_TILE_SPRITE.tokentray);
-        this.tokenTray[i].pos = vec((i-(row*10)) * 40 + 60, j * 40 + 20);
-        this.tokenTray[i].z = TILE_Z;
+    for (
+      let i = row * 10;
+      i < row * 10 + (this.myLevelData.numTokens % 10);
+      i++
+    ) {
+      this.tokenTray[i].graphics.use(LEVEL_TILE_SPRITE.tokentray);
+      this.tokenTray[i].pos = vec((i - row * 10) * 40 + 60, j * 40 + 20);
+      this.tokenTray[i].z = TILE_Z;
     }
 
-    // ******* Debugging purposes
-    this.levelMode = "playing";
+    // Add some tokens to the tray for testing
 
+    let token = this.getAvailableTokenTrayIndex();
+    if (token != -1) {
+      let tokenType:TokenType = "fwd4";
+      this.tokenTray[token].tokenType = tokenType;
+      this.tokenTray[token].mode = "placed";
+      this.tokenTray[token].tokenCommands = [...TOKEN_DATA[tokenType].commands];
+      const tokenOverlay = new Actor({ pos: vec(0, 0) });
+      tokenOverlay.graphics.use(TOKEN_DATA[tokenType].graphic);
+      this.tokenTray[token].addChild(tokenOverlay);
+    }
 
+    token = this.getAvailableTokenTrayIndex();
+    if (token != -1) {
+      let tokenType:TokenType = "tr";
+      this.tokenTray[token].tokenType = tokenType;
+      this.tokenTray[token].mode = "placed";
+      this.tokenTray[token].tokenCommands = [...TOKEN_DATA[tokenType].commands];
+      const tokenOverlay = new Actor({ pos: vec(0, 0) });
+      tokenOverlay.graphics.use(TOKEN_DATA[tokenType].graphic);
+      this.tokenTray[token].addChild(tokenOverlay);
+    }
+
+    token = this.getAvailableTokenTrayIndex();
+    if (token != -1) {
+      let tokenType:TokenType = "tr";
+      this.tokenTray[token].tokenType = tokenType;
+      this.tokenTray[token].mode = "placed";
+      this.tokenTray[token].tokenCommands = [...TOKEN_DATA[tokenType].commands];
+      const tokenOverlay = new Actor({ pos: vec(0, 0) });
+      tokenOverlay.graphics.use(TOKEN_DATA[tokenType].graphic);
+      this.tokenTray[token].addChild(tokenOverlay);
+    }
+
+    token = this.getAvailableTokenTrayIndex();
+    if (token != -1) {
+      let tokenType:TokenType = "fwd2";
+      this.tokenTray[token].tokenType = tokenType;
+      this.tokenTray[token].mode = "placed";
+      this.tokenTray[token].tokenCommands = [...TOKEN_DATA[tokenType].commands];
+      const tokenOverlay = new Actor({ pos: vec(0, 0) });
+      tokenOverlay.graphics.use(TOKEN_DATA[tokenType].graphic);
+      this.tokenTray[token].addChild(tokenOverlay);
+    }
+
+    // ******* Debugging purposes simulate an "Execute Plan" button click!
+    this.levelMode = "running";
   }
 
   override onDeactivate(_context: SceneActivationContext): void {
     // Called when Excalibur transitions away from this scene
     // Only 1 scene is active at a time
+
+    // clean out the token tray
+    for (const token of this.tokenTray) {
+      for (const child of token.children) {
+        token.removeChild(child);
+      }
+      token.mode = "unused";
+      token.tokenCommands = [];
+      token.tokenType = "";
+    }
   }
 
   override onPreUpdate(_engine: Engine, _elapsedMs: number): void {
     // Called before anything updates in the scene
+    switch (this.levelMode) {
+      case "intro":
+        // maybe some intro animation or something?
+        break;
+      case "paused":
+        // waiting for player to press "execute" button
+        break;
+      case "playing":
+        // waiting for player to place tokens in the tray
+        break;
+      case "running":
+        // executing the bot's commands
+        this.runCommandStep(this.bot);
+        break;
+      case "won":
+        // show some cool winning animation?
+        break;
+      case "lost":
+        // show some sad losing animation?
+        break;
+      default:
+        break;
+    }
   }
 
   override onPostUpdate(_engine: Engine, _elapsedMs: number): void {

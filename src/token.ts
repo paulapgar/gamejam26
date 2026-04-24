@@ -4,9 +4,8 @@ import {
   CollisionContact,
   Engine,
   Side,
-  vec,
-  Vector,
 } from "excalibur";
+import { TokenCommand } from "./models/token.model";
 
 // Actors are the main unit of composition you'll likely use, anything that you want to draw and move around the screen
 // is likely built with an actor
@@ -21,9 +20,16 @@ import {
 // actor.pointer
 
 export class Token extends Actor {
-  column: number = 0;  // column to fall down on 1, 2 or 3 assigned randomly
-  
+  // main properties
+  tokenType: string = ""; // e.g. "fwd", "fwd2", "fwd3"
+
+  // properties used while in falling mode
+  mode: "falling" | "placed" | "unused" = "unused";
+  fallingColumn: number = -1;  // column to fall down on 0, 1, 2 assigned randomly
   moving: boolean = false;
+
+  // properties used while in tray mode
+  tokenCommands: TokenCommand[] = [];    // e.g. ["fwd", "fwd"] for fwd2 token
 
   constructor() {
     super({
@@ -35,6 +41,17 @@ export class Token extends Actor {
       // anchor: vec(0, 0), // Actors default center colliders and graphics with anchor (0.5, 0.5)
       // collisionType: CollisionType.Active, // Collision Type Active means this participates in collisions read more https://excaliburjs.com/docs/collisiontypes
     });
+  }
+
+  addNextCommand(cmd: TokenCommand) {
+    this.tokenCommands.push(cmd);
+  }
+
+  pullNextCommand(): string | undefined {
+    if (this.tokenCommands.length === 0) {
+      return undefined;
+    }
+    return this.tokenCommands.shift();
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -55,6 +72,9 @@ export class Token extends Actor {
       // if (true) {
       //   evt.cancel();
       // }
+      // ***********************
+      // Clicking on token while falling is different than clicking on it while in tray
+      // so you might want to check mode
       console.log("You clicked the actor @", evt.worldPos.toString());
     });
   }

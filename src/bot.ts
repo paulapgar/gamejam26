@@ -7,7 +7,16 @@ import {
   vec,
   Vector,
 } from "excalibur";
-import { animDance, animRunDown, animRunLeft, animRunRight, animRunUp, animStandDown, animStandLeft, animStandRight, animStandUp } from "./resources";
+import {
+  animRunDown,
+  animRunLeft,
+  animRunRight,
+  animRunUp,
+  animStandDown,
+  animStandLeft,
+  animStandRight,
+  animStandUp,
+} from "./resources";
 
 // Actors are the main unit of composition you'll likely use, anything that you want to draw and move around the screen
 // is likely built with an actor
@@ -25,8 +34,8 @@ export type Facing = "Up" | "Down" | "Left" | "Right";
 
 export class Bot extends Actor {
   facing: Facing = "Down";
-  currentTile: Vector = vec(-1,-1); // x, y of Tiles not pixels  -1,-1 means not set
-  targetTile: Vector = vec(-1,-1);  // x, y of Tiles not pixels  -1,-1 means not set
+  currentTile: Vector = vec(-1, -1); // x, y of Tiles not pixels  -1,-1 means not set
+  targetTile: Vector = vec(-1, -1); // x, y of Tiles not pixels  -1,-1 means not set
   //carriedItem: Item = undefined;
   moving: boolean = false;
 
@@ -38,48 +47,49 @@ export class Bot extends Actor {
     });
   }
 
-  isMoving() : boolean {
+  isMoving(): boolean {
     return this.moving;
   }
 
   setAnimation() {
     switch (this.facing) {
-        case "Left":
-            if (this.isMoving()) {
-                this.graphics.use(animRunLeft);
-            }
-            else {
-                this.graphics.use(animStandLeft);
-            }
+      case "Left":
+        if (this.isMoving()) {
+          this.graphics.use(animRunLeft);
+        } else {
+          this.graphics.use(animStandLeft);
+        }
         break;
-        case "Right":
-            if (this.isMoving()) {
-                this.graphics.use(animRunRight);
-            }
-            else {
-                this.graphics.use(animStandRight);
-            }
+      case "Right":
+        if (this.isMoving()) {
+          this.graphics.use(animRunRight);
+        } else {
+          this.graphics.use(animStandRight);
+        }
         break;
-        case "Up":
-            if (this.isMoving()) {
-                this.graphics.use(animRunUp);
-            }
-            else {
-                this.graphics.use(animStandUp);
-            }
+      case "Up":
+        if (this.isMoving()) {
+          this.graphics.use(animRunUp);
+        } else {
+          this.graphics.use(animStandUp);
+        }
         break;
-        case "Down":
-            if (this.isMoving()) {
-                this.graphics.use(animRunDown);
-            }
-            else {
-                this.graphics.use(animStandDown);
-            }
+      case "Down":
+        if (this.isMoving()) {
+          this.graphics.use(animRunDown);
+        } else {
+          this.graphics.use(animStandDown);
+        }
         break;
     }
+
+    // **** testing
+    //this.graphics.use(animDance);
   }
+
   // turnLeft is going to simply set the animation and graphic for the bot
   turnLeft() {
+    this.moving = true;
     switch (this.facing) {
       case "Up":
         this.facing = "Left";
@@ -97,10 +107,13 @@ export class Bot extends Actor {
         console.log("Error: turnLeft, this.facing not set");
         break;
     }
+    this.setAnimation();
   }
 
   // turnRight is going to simply set the animation and graphic for the bot
   turnRight() {
+    this.moving = true;
+
     switch (this.facing) {
       case "Up":
         this.facing = "Right";
@@ -118,25 +131,23 @@ export class Bot extends Actor {
         console.log("Error: turnRight, this.facing not set");
         break;
     }
+    this.actions.delay(1000).callMethod(() => {
+      this.moving = false;
+      this.setMoveStop()
+    });
+    // we do not setAnimation() immediately because we want the turn to take some time
   }
 
   // setMoveForward is going to set the animation for the bot and a moveTo() target
   setMoveForward() {
     this.moving = true;
-
-    switch (this.facing) {
-        case "Right":
-            break;
-        case "Left":
-            break;
-        case "Up":
-            break;
-        case "Down":
-            break;
-        default:
-            console.log("Error: moveForward, this.facing not set");
-            break;
-    }
+    // convert tile coordinates to pixel coordinates, assuming tile size of 40 and anchor of (0.5, 0.5)
+    let destVec = vec(this.targetTile.x * 40 + 60, this.targetTile.y * 40 + 60);
+    this.actions.moveTo(destVec, 40).callMethod(() => {
+      this.currentTile = this.targetTile;
+      this.setMoveStop();
+    });
+    this.setAnimation();
   }
 
   // setMoveBlocked is going to set the animation for the bot to "bump" into obstacles
@@ -144,31 +155,31 @@ export class Bot extends Actor {
     this.moving = true;
 
     switch (this.facing) {
-        case "Right":
-            break;
-        case "Left":
-            break;
-        case "Up":
-            break;
-        case "Down":
-            break;
-        default:
-            console.log("Error: moveForward, this.facing not set");
-            break;
+      case "Right":
+        break;
+      case "Left":
+        break;
+      case "Up":
+        break;
+      case "Down":
+        break;
+      default:
+        console.log("Error: moveForward, this.facing not set");
+        break;
     }
-
   }
 
   setFacing(facing: Facing) {
     this.facing = facing;
   }
 
-  getFacing() : Facing {
+  getFacing(): Facing {
     return this.facing;
   }
 
   setMoveStop() {
     this.moving = false;
+    this.setAnimation();
   }
 
   //////////////////////////////////////////////////////////////////////////////
