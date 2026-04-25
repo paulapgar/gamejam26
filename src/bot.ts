@@ -54,8 +54,10 @@ export class Bot extends Actor {
   isWinning(): boolean {
     return this.winning;
   }
+
   setAnimation() {
-  
+
+    // if bot is moving backward it is still facing the same, with same animation
     switch (this.facing) {
       case "Left":
         if (this.isMoving()) {

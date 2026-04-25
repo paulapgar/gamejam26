@@ -27,7 +27,7 @@ for (const res of Object.values(RESOURCES)) {
 
 export const gameFont = RESOURCES.fontRetroGaming.toFont({
   family: "Retro",
-  color: Color.White,
+  color: Color.fromRGB(48, 136, 17, 255),
   size: 16,
   shadow: {
     offset: vec(4, 4),
@@ -182,9 +182,14 @@ export const TOKEN_SPRITE = {
   fwd2: mainSheet.getSprite(2, 8),
   fwd3: mainSheet.getSprite(3, 8),
   fwd4: mainSheet.getSprite(4, 8),
+  bck: mainSheet.getSprite(1, 9),
+  bck2: mainSheet.getSprite(2, 9),
+  bck3: mainSheet.getSprite(3, 9),
+  bck4: mainSheet.getSprite(4, 9),
   tr: mainSheet.getSprite(5, 8),
   tl: mainSheet.getSprite(6, 8),
   pu: mainSheet.getSprite(7, 8),
   pd: mainSheet.getSprite(8, 8),
   use: mainSheet.getSprite(9, 8),
+  unknown: mainSheet.getSprite(0, 7),
 };

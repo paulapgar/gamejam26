@@ -6,10 +6,9 @@ export interface LevelData {
     name: string;
     levelType: string; // e.g. "puzzle"
     charMap: string[];   // array of strings representing the level layout, each character corresponds to a tile type
-    tileGrid: TileKind[][]; // 2D array of TileKind derived from charMap for easier access during gameplay
     botFacing: "Up" | "Down" | "Left" | "Right"; // initial facing direction of the bot
     nextLevel: string | null; // name of the next level, null if this is the last level
-    tokens: TokenType[]; // array of tokens to place in the level, in specific order
+    tokenList: TokenType[]; // array of tokens to place in the level, in specific order
     numTokens: number;   // number of tokens placeable in the level
     instructionText: string[]; // array of instruction strings to show the player before starting the level
     instructionIcon: Sprite; // icon from to show above the instructions

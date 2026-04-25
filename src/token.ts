@@ -1,11 +1,19 @@
 import {
   Actor,
+  clamp,
   Collider,
   CollisionContact,
   Engine,
+  EventEmitter,
+  PointerButton,
   Side,
 } from "excalibur";
-import { TokenCommand } from "./models/token.model";
+
+export type TokenEvents = {
+  "tokenfalling-clicked": Token;
+  "tokentray-clicked": Token;
+};
+import { TokenCommand, TokenType } from "./models/token.model";
 
 // Actors are the main unit of composition you'll likely use, anything that you want to draw and move around the screen
 // is likely built with an actor
@@ -21,14 +29,16 @@ import { TokenCommand } from "./models/token.model";
 
 export class Token extends Actor {
   // main properties
-  tokenType: string = ""; // e.g. "fwd", "fwd2", "fwd3"
+  tokenType: TokenType = "";   // e.g. "fwd", "fwd2", "fwd3"
+  mode: "falling" | "placed" | "unused" = "unused";
+
+  readonly tokenEvents = new EventEmitter<TokenEvents>();
 
   // properties used while in falling mode
-  mode: "falling" | "placed" | "unused" = "unused";
   fallingColumn: number = -1;  // column to fall down on 0, 1, 2 assigned randomly
-  moving: boolean = false;
+  clickable: boolean = false;
 
-  // properties used while in tray mode
+  // properties used while in tray mode (will get 'shifted' off array when used each turn)
   tokenCommands: TokenCommand[] = [];    // e.g. ["fwd", "fwd"] for fwd2 token
 
   constructor() {
@@ -54,6 +64,8 @@ export class Token extends Actor {
     return this.tokenCommands.shift();
   }
 
+
+
   //////////////////////////////////////////////////////////////////////////////
   // Excalibur lifecycle methods
 
@@ -75,12 +87,28 @@ export class Token extends Actor {
       // ***********************
       // Clicking on token while falling is different than clicking on it while in tray
       // so you might want to check mode
-      console.log("You clicked the actor @", evt.worldPos.toString());
+      if (this.mode === "falling" && evt.button === PointerButton.Left) {
+        this.tokenEvents.emit("tokenfalling-clicked", this);
+        evt.cancel();
+      }
+      if (this.mode === "placed" && evt.button === PointerButton.Left) {
+        this.tokenEvents.emit("tokentray-clicked", this);
+        evt.cancel();
+      }
     });
   }
 
   override onPreUpdate(engine: Engine, elapsedMs: number): void {
     // Put any update logic here runs every frame before Actor builtins
+
+    // Handle the fading of falling tokens as they approach the top and bottom of the falling area
+    if (this.mode === "falling") {
+      if (this.pos.y <= 70) {
+        this.graphics.opacity = clamp((this.pos.y - 50) / 20, 0, 1);
+      } else if (this.pos.y > 410) {
+        this.graphics.opacity = clamp(1 - (this.pos.y - 410) / 20, 0, 1);
+      }
+    }
   }
 
   override onPostUpdate(engine: Engine, elapsedMs: number): void {

@@ -11,9 +11,10 @@
   - affects the bot animation and position
 - [x] handler for running checks environment for actions allowed based on position/TileMap
 - [x] checks for win/lose condition (losing is not hitting exit by end of program, or death)
-- [ ] ordered list of tokens to drop
-- [ ] Falling tokens in a certain order but in random columns
-- [ ] Click a falling token to add it to the runnable program
+- [x] ordered list of tokens to drop
+- [x] Falling tokens in a certain order but in random columns
+- [x] Click a falling token to add it to the runnable program
+- [x] Click on token tray and it removes token from runnable program
 - [ ] Filling up the "Context Window" box with grayscale(?) smaller tokens
 - [ ] Introduction text panel info (when start level)
 - [ ] Execute Plan button to start runnable program
@@ -26,7 +27,7 @@
 - [ ] Exit Level button (brings back to Title screen)
 - [ ] Add shocker tile to kill robot if walk on it
 - [ ] Add Pressure Switch tile to create bridge
-- [ ] "pu" and "pd" bot action
+- [ ] "pickup" and "putdown" item for bot action
 - [ ] Add Key tile to open door tiles
-- [ ] "Use" bot action
+- [ ] "Use" item for bot action
 - [ ] Cliffhanger screen for ending with Dopus ?
