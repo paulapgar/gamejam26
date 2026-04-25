@@ -32,7 +32,7 @@ game.start('root', {
     destinationIn: new FadeInOut({
       duration: 1000,
       direction: 'in',
-      color: Color.ExcaliburBlue
+      color: Color.Black
     })
   });
 });

@@ -7,10 +7,10 @@ export const LEVEL_DATA: Record<string, LevelData> = {
     levelType: "puzzle",
     charMap: [
       "   www    ",
+      "   w.w    ",
+      "   wzw    ",
+      "   w.w    ",
       "   wxw    ",
-      "   w.w    ",
-      "   w.w    ",
-      "   w.w    ",
       "   w.w    ",
       "   w.w    ",
       "   w.w    ",

@@ -4,22 +4,29 @@
   - level name
   - string map for tiles
   - next level link (when completed level)
-  - size of runnable program allowed (# of tokens placeable)
+  - size of runnable program allowed (# of tokens placeable) called Compute
   - introduction text panel data (icon, text) ?
-- [ ] structure for running program of tokens
-- [ ] handler for running the program move by move (within Level scene)
+- [x] structure for running program of tokens
+- [x] handler for running the program move by move (within Level scene)
   - affects the bot animation and position
-  - checks environment for actions allowed
-  - checks for win/lose condition (losing is not hitting exit by end of program)
+- [x] handler for running checks environment for actions allowed based on position/TileMap
+- [x] checks for win/lose condition (losing is not hitting exit by end of program, or death)
 - [ ] ordered list of tokens to drop
 - [ ] Falling tokens in a certain order but in random columns
 - [ ] Click a falling token to add it to the runnable program
 - [ ] Filling up the "Context Window" box with grayscale(?) smaller tokens
-- [ ] introduction text panel info (when start level)
-- [ ] Title Screen
+- [ ] Introduction text panel info (when start level)
+- [ ] Execute Plan button to start runnable program
 - [ ] Switching between scenes / levels
+- [ ] Next Level button if you win
+- [ ] Restart Level button if you lose or just want to restart
+- [ ] background sprite graphics fill-in details and text labels
+- [ ] Title Screen
 - [ ] Pause/Resume button
-- [ ] Restart Level button
-- [ ] Exit Level button
-- [ ] Add Switch tile to create bridge
-- [ ] Add Key tile to open locked doors
+- [ ] Exit Level button (brings back to Title screen)
+- [ ] Add shocker tile to kill robot if walk on it
+- [ ] Add Pressure Switch tile to create bridge
+- [ ] "pu" and "pd" bot action
+- [ ] Add Key tile to open door tiles
+- [ ] "Use" bot action
+- [ ] Cliffhanger screen for ending with Dopus ?

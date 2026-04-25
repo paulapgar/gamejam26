@@ -1,5 +1,5 @@
 import { Sprite } from "excalibur";
-import { TileKind, LEVEL_TILE_SPRITE } from "../resources";
+import { LEVEL_TILE_SPRITE } from "../resources";
 import { TokenType } from "./token.model";
 
 export interface LevelData {
@@ -16,7 +16,9 @@ export interface LevelData {
     instructionIconText: string; // text to show next to the instruction icon
 }
 
-export type LevelGrid = TileKind[][];
+// Tile definitions consolidated into a single registry
+export type TileKind = "floor" | "wall1" | "start" | "exit";
+
 
 export function getTileChar(charMap: string[], posX: number, posY: number): string | undefined {
   if (!charMap) return undefined;
