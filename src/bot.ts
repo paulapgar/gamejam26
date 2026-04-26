@@ -180,18 +180,16 @@ export class Bot extends Actor {
   setMoveWinning() {
     this.moving = true;
     this.winning = true;
-    this.actions.delay(1000).callMethod(() => {
-      this.setMoveStop();
-    });
+    this.setMoveStop();
     this.setAnimation();
   }
 
   setMoveDying() {
     this.moving = true;
     this.dying = true;
-    this.actions.delay(1000).callMethod(() => {
+    //this.actions.delay(1000).callMethod(() => {
       this.setMoveStop();
-    });
+    //});
     this.setAnimation();
   }
 

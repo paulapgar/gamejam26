@@ -1,4 +1,4 @@
-import { Sprite } from "excalibur";
+import { Sprite, Animation } from "excalibur";
 import { LEVEL_TILE_SPRITE } from "../resources";
 import { TokenType } from "./token.model";
 
@@ -11,7 +11,7 @@ export interface LevelData {
     tokenList: TokenType[]; // array of tokens to place in the level, in specific order
     numTokens: number;   // number of tokens placeable in the level
     instructionText: string[]; // array of instruction strings to show the player before starting the level
-    instructionIcon: Sprite; // icon from to show above the instructions
+    instructionIcon: Sprite | Animation; // icon to show above the instructions
     instructionIconText: string; // text to show next to the instruction icon
 }
 

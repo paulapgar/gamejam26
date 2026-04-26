@@ -15,17 +15,17 @@
 - [x] Falling tokens in a certain order but in random columns
 - [x] Click a falling token to add it to the runnable program
 - [x] Click on token tray and it removes token from runnable program
-- [ ] Filling up the "Context Window" box with grayscale(?) smaller tokens
-- [ ] Introduction text panel info (when start level)
-- [ ] Execute Plan button to start runnable program
-- [ ] Switching between scenes / levels
-- [ ] Next Level button if you win
-- [ ] Restart Level button if you lose or just want to restart
+- [x] Filling up the "Context Window" box with grayscale(?) smaller tokens
+- [x] Introduction text panel info (when start level)
+- [x] Execute Plan button to start runnable program
+- [x] Switching between scenes / levels
+- [x] Next Level button if you win
+- [x] Restart Level button if you lose or just want to restart
 - [ ] background sprite graphics fill-in details and text labels
 - [ ] Title Screen
 - [ ] Pause/Resume button
 - [ ] Exit Level button (brings back to Title screen)
-- [ ] Add shocker tile to kill robot if walk on it
+- [x] Add shocker tile to kill robot if walk on it
 - [ ] Add Pressure Switch tile to create bridge
 - [ ] "pickup" and "putdown" item for bot action
 - [ ] Add Key tile to open door tiles

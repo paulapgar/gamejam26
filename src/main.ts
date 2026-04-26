@@ -1,7 +1,9 @@
 import { Color, DisplayMode, Engine, FadeInOut } from "excalibur";
 import { loader } from "./resources";
 import { MyLevel } from "./level";
+import { TitleScene } from "./title";
 import { LEVEL_DATA } from "./models/level.data";
+import { Cliffhanger } from "./cliffhanger";
 
 // Goal is to keep main.ts small and just enough to configure the engine
 
@@ -14,20 +16,24 @@ const game = new Engine({
   pixelRatio: 1,
   backgroundColor: Color.Black,
   scenes: {
-    start: MyLevel
+    title: TitleScene,
+    level: MyLevel,
+    cliffhanger: Cliffhanger,
   },
-  // physics: {
-  //   solver: SolverStrategy.Realistic,
-  //   substep: 5 // Sub step the physics simulation for more robust simulations
-  // },
-  // fixedUpdateTimestep: 16 // Turn on fixed update timestep when consistent physic simulation is important
 });
 
 // name of the start scene 'start'
 game.start('root', {
   loader, // Optional loader (but needed for loading images/sounds)
 }).then(() => {
-  game.goToScene('start', {
+  // game.goToScene('title', {
+  //   destinationIn: new FadeInOut({
+  //     duration: 1000,
+  //     direction: 'in',
+  //     color: Color.Black
+  //   })
+  // });
+  game.goToScene('level', {
     sceneActivationData: LEVEL_DATA["Level 1"],
     destinationIn: new FadeInOut({
       duration: 1000,

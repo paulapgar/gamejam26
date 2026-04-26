@@ -10,9 +10,18 @@ import {
   Vector,
   randomIntInRange,
   Label,
+  Color,
+  FadeInOut,
 } from "excalibur";
 
-import { ANIM, LEVEL_TILE_SPRITE, bkgSprite, gameFont } from "./resources";
+import {
+  ANIM,
+  LEVEL_TILE_SPRITE,
+  bkgSprite,
+  gameFontWhite,
+  gameFontWhiteLeft,
+  gameFontGreen,
+} from "./resources";
 
 import {
   getTileChar,
@@ -24,12 +33,16 @@ import { Bot } from "./bot";
 import { Token } from "./token";
 import { TOKEN_DATA } from "./models/token.data";
 import { TokenType } from "./models/token.model";
+import { MyButton } from "./button";
+import { LEVEL_DATA } from "./models/level.data";
 
-const BKG_Z = -100;
-const TILE_Z = -50;
+const BKG_Z = -100; // Background sprite Z
+const TILE_Z = -50; // Tilemap Z
+const INST_Z = 10; // Instruction background Z (text/sprite+1)
 
 const tileSize = 40;
 const tileMapOffset = vec(60, 60); // the middle of tile (0,0)
+const contextWindowOffset = vec(494, 546);
 
 export class MyLevel extends Scene {
   levelTileMap!: TileMap;
@@ -40,11 +53,24 @@ export class MyLevel extends Scene {
   fallingTokens: Token[] = [];
   tokenBucket: TokenType[] = [];
   dropFallingToken: boolean = false;
+  contextWindowMaxSize: number = 30;
+  contextWindowActors: Actor[] = [];
+
+  instructionsBkg!: Actor;
+  computeLabel!: Label;
 
   tokenTray: Token[] = [];
   tokenTraySize: number = 0;
   tokenTrayActive: number = -1; // index of active token in the tray or -1 if no active token
   tokenTrayActiveOverlay!: Actor; // overlay Actor to show the token graphic of the active token in the tray
+
+  startLevelButton!: MyButton;
+  restartLevelButton!: MyButton;
+  nextLevelButton!: MyButton;
+  pauseLevelButton!: MyButton;
+  resumeLevelButton!: MyButton;
+  exitLevelButton!: MyButton;
+  executePlanButton!: MyButton;
 
   getAvailableTokenTrayIndex(): number {
     for (let i = 0; i < this.myLevelData.numTokens; i++) {
@@ -113,7 +139,7 @@ export class MyLevel extends Scene {
 
     if (bot.isWinning()) {
       if (this.levelMode !== "won") {
-        this.levelMode = "won";
+        this.setLevelMode("won");
       }
       return;
     }
@@ -219,7 +245,7 @@ export class MyLevel extends Scene {
         token.pos = vec(500 + token.fallingColumn * 40, 20);
         token.graphics.opacity = 0;
         token.mode = "falling";
-        token.clickable = true;
+        token.clickable = false;
         token.tokenType = tokenType;
         this.add(token);
         this.fallingTokens.push(token);
@@ -234,11 +260,17 @@ export class MyLevel extends Scene {
             this.dropFallingToken = true;
             token.clickable = true;
           })
-          .moveTo(vec(500 + token.fallingColumn * 40, 420), 40)
+          .moveTo(vec(500 + token.fallingColumn * 40, 400), 40)
           .callMethod(() => {
             token.clickable = false;
+          })
+          .moveTo(vec(500 + token.fallingColumn * 40, 420), 40)
+          .callMethod(() => {
             token.mode = "unused";
             token.pos = vec(-100, -100); // move off screen until we can reuse in tray
+            // Add a new actor to fill up the Context Window
+            // ****
+            this.addContextWindowActor();
           });
       } else {
         console.log("Error: getNewFallingToken, tokenType not found in bucket");
@@ -257,7 +289,8 @@ export class MyLevel extends Scene {
   }
 
   onTrayTokenClicked(token: Token) {
-    console.log("Tray token clicked:", token.tokenType);
+    if (this.levelMode === "playing") {
+
     const tokenNum = this.findTokenInTray(token);
     if (tokenNum != -1) {
       // remove the token from the tray
@@ -268,7 +301,7 @@ export class MyLevel extends Scene {
     } else {
       console.log("Error: onTrayTokenClicked, token not found in tray");
     }
-    // TODO: handle tray token selection
+  }
   }
 
   onFallingTokenClicked(token: Token) {
@@ -286,9 +319,12 @@ export class MyLevel extends Scene {
         tokenOverlay.graphics.use(TOKEN_DATA[token.tokenType].graphic);
         this.tokenTray[tokenNum].addChild(tokenOverlay);
         // subscribe to tray click for this slot
-        this.tokenTray[tokenNum].tokenEvents.on("tokentray-clicked", (clickedToken) => {
-          this.onTrayTokenClicked(clickedToken);
-        });
+        this.tokenTray[tokenNum].tokenEvents.on(
+          "tokentray-clicked",
+          (clickedToken) => {
+            this.onTrayTokenClicked(clickedToken);
+          },
+        );
         // token data copied move the falling token away
         token.clickable = false;
         token.mode = "unused";
@@ -305,6 +341,116 @@ export class MyLevel extends Scene {
       this.startNewFallingToken();
       this.dropFallingToken = false;
     }
+  }
+
+  getContextWindowAmount(): number {
+    return this.contextWindowActors.length;
+  }
+
+  addContextWindowActor(): void {
+    if (this.contextWindowActors.length >= this.contextWindowMaxSize) {
+      // Context Window is full, don't add more
+      // **** FORCE the game to switch to "running" mode when this happens and start auto executing the bot's commands with a delay between each step until the end of the context window is reached, then switch back to "playing" mode and allow the player to add more commands to the tray
+      this.setLevelMode("running");
+      return;
+    } else {
+      const spr = randomIntInRange(1, 4);
+      const contextActor = new Actor({
+        pos: vec(
+          contextWindowOffset.x + (this.contextWindowActors.length % 10) * 28,
+          contextWindowOffset.y -
+            Math.floor(this.contextWindowActors.length / 10) * 26,
+        ),
+        width: 30,
+        height: 30,
+        opacity: 0,
+        rotation: Math.random() * 180,
+        scale: vec(0.75, 0.75),
+        // *****  ?? for some reason need to typecast here to avoid a TS error about the keys of LEVEL_TILE_SPRITE
+        graphic:
+          LEVEL_TILE_SPRITE[
+            ("contextWindow" + spr) as keyof typeof LEVEL_TILE_SPRITE
+          ],
+      });
+      contextActor.actions.fade(1, 500);
+      this.contextWindowActors.push(contextActor);
+      this.add(contextActor);
+    }
+  }
+
+  updateCompute(compute:number): void {
+    this.computeLabel.text = `Compute Power (${compute} TOPS)`;
+    this.myLevelData.numTokens = compute;
+  }
+
+  setLevelMode(
+    mode: "intro" | "paused" | "playing" | "running" | "won" | "lost",
+  ) {
+    switch (mode) {
+      case "intro":
+        // intro is handled entirely by onActivate() for the level, so no need to do anything here
+        break;
+      case "playing":
+        // hide instructions and start dropping tokens
+        this.dropFallingToken = true;
+        this.instructionsBkg.pos = vec(-1000, -1000); // move off screen
+        // replace button with Execute Plan button
+        this.startLevelButton.setHidden();
+        this.executePlanButton.setVisible();
+        this.restartLevelButton.setEnabled();
+        break;
+      case "running":
+        // stop dropping tokens, make the falling tokens disappear, and start executing the bot's commands in the tray
+        // clean out falling tokens
+        for (const token of this.fallingTokens) {
+          token.clickable = false;
+          token.actions.clearActions();
+          token.actions.fade(0, 500).callMethod(() => {
+            token.actions.die();
+          });
+        }
+        this.fallingTokens = [];
+        // **** add some visual indication that the bot is now executing the commands in the tray
+        this.executePlanButton.setDisabled(); // disable the button while running
+        break;
+      case "won":
+        // show winning message and button to go to next level if there is one
+        // Swap out the restart button for a Next button
+        this.restartLevelButton.setHidden();
+        this.nextLevelButton.setVisible();
+        break;
+      case "lost":
+        // show losing message and button to restart level
+        break;
+      case "paused":
+        // show instructions with instructionsBkg and hide the tilemap and token tray
+        break;
+    }
+    this.levelMode = mode;
+  }
+
+  cleanLevel() {
+    // clean out the token tray
+    for (const token of this.tokenTray) {
+      for (const child of token.children) {
+        token.removeChild(child);
+      }
+      token.mode = "unused";
+      token.tokenCommands = [];
+      token.tokenType = "";
+    }
+
+    this.contextWindowActors.forEach((actor) => {
+      this.remove(actor);
+    });
+    this.contextWindowActors = [];
+
+    // clean out falling tokens
+    for (const token of this.fallingTokens) {
+      token.actions.clearActions();
+      this.remove(token);
+    }
+    this.fallingTokens = [];
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -329,6 +475,16 @@ export class MyLevel extends Scene {
     });
     background.graphics.use(bkgSprite);
     this.add(background);
+
+    this.instructionsBkg = new Actor({
+      pos: vec(-1000, -1000), // start off screen until we set it properly in onActivate
+      width: 400,
+      height: 400,
+      anchor: vec(0, 0),
+      color: Color.fromRGB(52, 81, 111, 1),
+      z: INST_Z,
+    });
+    this.add(this.instructionsBkg);
 
     // Create a 10x10 TileMap, is filled in by onActivate based on LevelData passed in
     this.levelTileMap = new TileMap({
@@ -358,24 +514,38 @@ export class MyLevel extends Scene {
 
     const tokenLabel = new Label({
       text: "Tokens",
-      pos: vec(500, 20),
-      font: gameFont,
+      pos: vec(535, 20),
+      font: gameFontGreen,
     });
     this.add(tokenLabel);
 
     const contextLabel = new Label({
-      text: "Context Window",
-      pos: vec(540, 460),
-      font: gameFont,
+      text: "Context Window (-% Bonus)",
+      pos: vec(620, 460),
+      font: gameFontGreen,
     });
     this.add(contextLabel);
 
-    const computeLabel = new Label({
-      text: "Compute Power",
-      pos: vec(170, 560),
-      font: gameFont,
+    const agentLabel = new Label({
+      text: "Agent",
+      pos: vec(700, 20),
+      font: gameFontGreen,
     });
-    this.add(computeLabel);
+    this.add(agentLabel);
+
+    const harnessLabel = new Label({
+      text: "Agentic Testing Harness",
+      pos: vec(240, 20),
+      font: gameFontGreen,
+    });
+    this.add(harnessLabel);
+
+    this.computeLabel = new Label({
+      text: "Compute Power ( )",
+      pos: vec(240, 560),
+      font: gameFontGreen,
+    });
+    this.add(this.computeLabel);
   }
 
   override onPreLoad(_loader: DefaultLoader): void {
@@ -388,17 +558,20 @@ export class MyLevel extends Scene {
 
     // Some initializing logic
     this.tokenTrayActive = -1;
-    this.levelMode = "playing"; // **** for testing purposes, should be "intro"
-    this.dropFallingToken = true; // **** for testing purposes, should start as false
+    this.levelMode = "intro";
+    this.dropFallingToken = false;
     this.tokenTrayActiveOverlay.pos = vec(-100, -100); // move off screen until we have an active token running
 
     this.myLevelData = context.data!;
 
     // init the available tokens for this level
     this.tokenBucket = [...this.myLevelData.tokenList];
+    this.updateCompute(this.myLevelData.numTokens);
+
 
     this.bot.moving = false;
     this.bot.dying = false;
+    this.bot.winning = false;
     this.bot.setFacing(this.myLevelData.botFacing);
     this.bot.setAnimation();
 
@@ -449,6 +622,10 @@ export class MyLevel extends Scene {
                   tileRef.addGraphic(ANIM.shockTile3);
               }
               break;
+            case "d":
+              this.setTileType(vec(tx, ty), "blocked");
+              tileRef.addGraphic(LEVEL_TILE_SPRITE.door);
+              break;
             default:
               break;
           }
@@ -462,9 +639,9 @@ export class MyLevel extends Scene {
       this.tokenTray[i].z = TILE_Z;
     }
 
-    // Now we build up the tray based on the numTokens for the level
-    // Fugly code ...
-    // First row if there are more than 10 Compute
+    // Now we build up the tray based on the numTokens for the level.
+    // Row 1 (indices 0–9)  — only shown when numTokens > 10
+    // Row 2 (indices 10–19) — or row 1 when numTokens <= 10
     let j = 12;
     let row = 0;
     if (this.myLevelData.numTokens > 10) {
@@ -476,31 +653,145 @@ export class MyLevel extends Scene {
       j++;
       row++;
     }
-    // Second row if there are more than 10 Compute otherwise first row
-    for (
-      let i = row * 10;
-      i < row * 10 + (this.myLevelData.numTokens % 10);
-      i++
-    ) {
+    // Second row (or only row when numTokens <= 10)
+    for (let i = row * 10; i < this.myLevelData.numTokens; i++) {
       this.tokenTray[i].graphics.use(LEVEL_TILE_SPRITE.tokentray);
       this.tokenTray[i].pos = vec((i - row * 10) * 40 + 60, j * 40 + 20);
       this.tokenTray[i].z = TILE_Z;
     }
+
+    // onActivate we can assume it is at intro mode so set up the instructions
+    this.instructionsBkg.removeAllChildren();
+    this.instructionsBkg.pos = vec(40, 40);
+    const instructionsTitle = new Label({
+      text: "instructions.md",
+      pos: vec(200, 5),
+      font: gameFontWhite,
+    });
+    this.instructionsBkg.addChild(instructionsTitle);
+
+    const instructionsLabel = new Label({
+      text: this.myLevelData.instructionText.join("\n"),
+      pos: vec(5, 160),
+      font: gameFontWhiteLeft,
+    });
+    this.instructionsBkg.addChild(instructionsLabel);
+
+    const instructionsIcon = new Actor({
+      pos: vec(200, 70),
+      width: 40,
+      height: 40,
+      scale: vec(2, 2),
+    });
+    instructionsIcon.graphics.use(this.myLevelData.instructionIcon);
+    this.instructionsBkg.addChild(instructionsIcon);
+
+    const instructionsIconText = new Label({
+      text: this.myLevelData.instructionIconText,
+      pos: vec(200, 110),
+      font: gameFontWhite,
+    });
+    this.instructionsBkg.addChild(instructionsIconText);
+
+    const agentLabel = new Label({
+      text: `Gippity\nVer: 0.0.0.1\nExp: 0\n${this.myLevelData.name}`,
+      pos: vec(640, 40),
+      font: gameFontWhiteLeft,
+    });
+    this.add(agentLabel);
+
+    this.startLevelButton = new MyButton(
+      vec(240, 460),
+      LEVEL_TILE_SPRITE.button4,
+      "Start Level",
+    );
+    this.startLevelButton.setVisible();
+    this.startLevelButton.on("pointerup", () => {
+      this.setLevelMode("playing");
+    });
+    this.add(this.startLevelButton);
+
+    this.executePlanButton = new MyButton(
+      vec(240, 460),
+      LEVEL_TILE_SPRITE.button4,
+      "Execute Plan",
+    );
+    this.executePlanButton.on("pointerup", () => {
+      if (this.levelMode === "playing") {
+        this.setLevelMode("running");
+      }
+    });
+    this.add(this.executePlanButton);
+
+    this.restartLevelButton = new MyButton(
+      vec(17.5 * 40, 200),
+      LEVEL_TILE_SPRITE.button4,
+      "Restart Level",
+    );
+    this.restartLevelButton.setVisible();
+    this.restartLevelButton.setDisabled();
+    this.restartLevelButton.on("pointerup", () => {
+      if (this.levelMode !== "intro") {
+        this.setLevelMode("intro");
+        this.cleanLevel();
+        this.onActivate(context); // re-run the onActivate logic to reset the level
+      }
+    });
+    this.add(this.restartLevelButton);
+
+    this.nextLevelButton = new MyButton(
+      vec(17.5 * 40, 200),
+      LEVEL_TILE_SPRITE.button4,
+      "Next Level",
+    );
+    this.nextLevelButton.on("pointerup", () => {
+      if (this.myLevelData.nextLevel) {
+        if (LEVEL_DATA[this.myLevelData.nextLevel].levelType === "puzzle") {
+          this.engine.goToScene("level", {
+            sceneActivationData: LEVEL_DATA[this.myLevelData.nextLevel],
+            destinationIn: new FadeInOut({
+              duration: 1000,
+              direction: "in",
+              color: Color.Black,
+            }),
+          });
+        } else {
+          // Non puzzle levels could be a cutscene
+          if (this.myLevelData.nextLevel === "Title") {
+            this.engine.goToScene("title", {
+              destinationIn: new FadeInOut({
+                duration: 1000,
+                direction: "in",
+                color: Color.Black,
+              }),
+            });
+          }
+        }
+      }
+    });
+    this.add(this.nextLevelButton);
+
+    this.exitLevelButton = new MyButton(
+      vec(17.5 * 40, 200),
+      LEVEL_TILE_SPRITE.button4,
+      "Exit to Menu",
+    );
+    this.exitLevelButton.on("pointerup", () => {
+      this.engine.goToScene("title", {
+        destinationIn: new FadeInOut({
+          duration: 1000,
+          direction: "in",
+          color: Color.Black,
+        }),
+      });
+    });
+    this.add(this.exitLevelButton);
   }
 
   override onDeactivate(_context: SceneActivationContext): void {
     // Called when Excalibur transitions away from this scene
     // Only 1 scene is active at a time
-
-    // clean out the token tray
-    for (const token of this.tokenTray) {
-      for (const child of token.children) {
-        token.removeChild(child);
-      }
-      token.mode = "unused";
-      token.tokenCommands = [];
-      token.tokenType = "";
-    }
+    this.cleanLevel();
   }
 
   override onPreUpdate(_engine: Engine, _elapsedMs: number): void {

@@ -8,6 +8,7 @@ import {
   Color,
   vec,
   AnimationStrategy,
+  TextAlign,
 } from "excalibur";
 
 // It is convenient to put your RESOURCE in one place
@@ -25,15 +26,66 @@ for (const res of Object.values(RESOURCES)) {
   loader.addResource(res);
 }
 
-export const gameFont = RESOURCES.fontRetroGaming.toFont({
+export const gameFontGreen = RESOURCES.fontRetroGaming.toFont({
   family: "Retro",
   color: Color.fromRGB(48, 136, 17, 255),
   size: 16,
+  textAlign: TextAlign.Center,
   shadow: {
     offset: vec(4, 4),
     color: Color.Black,
   },
 });
+
+export const gameFontWhite = RESOURCES.fontRetroGaming.toFont({
+  family: "Retro",
+  color: Color.fromRGB(220, 220, 220, 255),
+  size: 16,
+  lineHeight: 30,
+  textAlign: TextAlign.Center,
+  shadow: {
+    offset: vec(4, 4),
+    color: Color.Black,
+  },
+});
+
+export const gameFontWhiteLeft = RESOURCES.fontRetroGaming.toFont({
+  family: "Retro",
+  color: Color.fromRGB(220, 220, 220, 255),
+  size: 16,
+  lineHeight: 30,
+  textAlign: TextAlign.Left,
+  shadow: {
+    offset: vec(4, 4),
+    color: Color.Black,
+  },
+});
+
+export const gameFontGray = RESOURCES.fontRetroGaming.toFont({
+  family: "Retro",
+  color: Color.fromRGB(120, 120, 120, 255),
+  size: 16,
+  lineHeight: 30,
+  textAlign: TextAlign.Center,
+  shadow: {
+    offset: vec(4, 4),
+    color: Color.Black,
+  },
+});
+
+
+export const gameFontDarkGray = RESOURCES.fontRetroGaming.toFont({
+  family: "Retro",
+  color: Color.fromRGB(60, 60, 60, 255),
+  size: 16,
+  lineHeight: 30,
+  textAlign: TextAlign.Center,
+  shadow: {
+    offset: vec(4, 4),
+    color: Color.Black,
+  },
+});
+
 
 export const bkgSprite = Sprite.from(RESOURCES.background);
 
@@ -173,8 +225,15 @@ export const LEVEL_TILE_SPRITE = {
   enter: mainSheet.getSprite(1, 3),
   unknown: mainSheet.getSprite(0, 7),
   black: mainSheet.getSprite(1, 7),
+  door: mainSheet.getSprite(8, 3),
   tokentray: mainSheet.getSprite(2, 7),
   tokenactive: mainSheet.getSprite(3, 7),
+  contextWindow1: mainSheet.getSprite(4, 7),
+  contextWindow2: mainSheet.getSprite(5, 7),
+  contextWindow3: mainSheet.getSprite(6, 7),
+  contextWindow4: mainSheet.getSprite(7, 7),
+  button4: RESOURCES.spriteSheet.toSprite({ sourceView: { x: 0, y: 400, width: 160, height: 40 } }),
+  button3: RESOURCES.spriteSheet.toSprite({ sourceView: { x: 0, y: 440, width: 120, height: 40 } }),
 };
 
 export const TOKEN_SPRITE = {
