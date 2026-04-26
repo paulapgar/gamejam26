@@ -2,6 +2,7 @@ import {
   Animation,
   ImageSource,
   Loader,
+  Sound,
   SpriteSheet,
   Sprite,
   FontSource,
@@ -20,11 +21,32 @@ export const RESOURCES = {
 } as const; // the 'as const' is a neat typescript trick to get strong typing on your RESOURCE.
 // So when you type RESOURCE.Sword -> ImageSource
 
+export const SOUNDS = {
+  selectToken: new Sound("./sound/select-token.wav"),
+  deleteToken: new Sound("./sound/delete-token.wav"),
+  death: new Sound("./sound/death.wav"),
+  victory: new Sound("./sound/victory.wav"),
+  jump: new Sound("./sound/jump.wav"),
+  jump2: new Sound("./sound/jump2.wav"),
+  jump3: new Sound("./sound/jump3.wav"),
+  context: new Sound("./sound/context.wav"),
+  failToken: new Sound("./sound/fail-token.wav"),
+  click: new Sound("./sound/click.wav"),
+} as const;
+
+export function playRandomJump(): void {
+  const jumps = [SOUNDS.jump, SOUNDS.jump2, SOUNDS.jump3];
+  jumps[Math.floor(Math.random() * jumps.length)].play();
+}
+
 // We build a loader and add all of our RESOURCE to the boot loader
 // You can build your own loader by extending DefaultLoader
 export const loader = new Loader();
 for (const res of Object.values(RESOURCES)) {
   loader.addResource(res);
+}
+for (const snd of Object.values(SOUNDS)) {
+  loader.addResource(snd);
 }
 
 export const gameFontGreen = RESOURCES.fontRetroGaming.toFont({

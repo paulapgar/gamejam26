@@ -2,7 +2,6 @@ import { Color, DisplayMode, Engine, FadeInOut } from "excalibur";
 import { loader } from "./resources";
 import { MyLevel } from "./level";
 import { TitleScene } from "./title";
-import { LEVEL_DATA } from "./models/level.data";
 import { Cliffhanger } from "./cliffhanger";
 
 // Goal is to keep main.ts small and just enough to configure the engine

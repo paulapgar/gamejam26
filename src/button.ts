@@ -11,7 +11,7 @@ import {
   vec,
   Vector,
 } from "excalibur";
-import { gameFontDarkGray, gameFontGray, gameFontWhite } from "./resources";
+import { gameFontDarkGray, gameFontGray, gameFontWhite, SOUNDS } from "./resources";
 
 export class MyButton extends Actor {
   label: Label;
@@ -97,6 +97,11 @@ export class MyButton extends Actor {
     this.on("pointerdown", (evt) => {
       if (evt.button === PointerButton.Left) {
         evt.cancel();
+      }
+    });
+    this.on("pointerup", () => {
+      if (this.enabled) {
+        SOUNDS.click.play();
       }
     });
   }

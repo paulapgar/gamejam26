@@ -17,6 +17,7 @@ import {
 import {
   ANIM,
   LEVEL_TILE_SPRITE,
+  SOUNDS,
   bkgSprite,
   gameFontWhite,
   gameFontWhiteLeft,
@@ -298,6 +299,7 @@ export class MyLevel extends Scene {
         token.mode = "unused";
         token.tokenCommands = [];
         token.removeAllChildren();
+        SOUNDS.deleteToken.play();
       } else {
         console.log("Error: onTrayTokenClicked, token not found in tray");
       }
@@ -314,6 +316,7 @@ export class MyLevel extends Scene {
         this.tokenTray[tokenNum].tokenCommands = [
           ...TOKEN_DATA[token.tokenType].commands,
         ];
+        SOUNDS.selectToken.play();
         const tokenOverlay = new Actor({ pos: vec(0, 0) });
         tokenOverlay.graphics.use(TOKEN_DATA[token.tokenType].graphic);
         this.tokenTray[tokenNum].addChild(tokenOverlay);
@@ -329,6 +332,8 @@ export class MyLevel extends Scene {
         token.mode = "unused";
         token.pos = vec(-100, -100); // move off screen until we can reuse in tray
         token.actions.clearActions(); // stop any ongoing actions (like falling)
+      } else {
+        SOUNDS.failToken.play();
       }
     }
 
@@ -373,7 +378,9 @@ export class MyLevel extends Scene {
       });
       contextActor.actions.fade(1, 500);
       this.contextWindowActors.push(contextActor);
+      SOUNDS.context.play();
       this.add(contextActor);
+      
     }
   }
 

@@ -7,7 +7,7 @@ import {
   vec,
   Vector,
 } from "excalibur";
-import { ANIM } from "./resources";
+import { ANIM, SOUNDS, playRandomJump } from "./resources";
 
 // Actors are the main unit of composition you'll likely use, anything that you want to draw and move around the screen
 // is likely built with an actor
@@ -120,6 +120,7 @@ export class Bot extends Actor {
         console.log("Error: turnLeft, this.facing not set");
         break;
     }
+    playRandomJump();
     this.actions.delay(500).callMethod(() => {
       this.moving = false;
       this.setMoveStop()
@@ -148,6 +149,7 @@ export class Bot extends Actor {
         console.log("Error: turnRight, this.facing not set");
         break;
     }
+    playRandomJump();
     this.actions.delay(500).callMethod(() => {
       this.moving = false;
       this.setMoveStop()
@@ -158,6 +160,7 @@ export class Bot extends Actor {
   // setMoveForward is going to set the animation for the bot and a moveTo() target
   setMoveForward() {
     this.moving = true;
+    playRandomJump();
     // convert tile coordinates to pixel coordinates, assuming tile size of 40 and anchor of (0.5, 0.5)
     let destVec = vec(this.targetTile.x * 40 + 60, this.targetTile.y * 40 + 60);
     this.actions.moveTo(destVec, 40).callMethod(() => {
@@ -173,6 +176,7 @@ export class Bot extends Actor {
     this.actions.delay(1000).callMethod(() => {
       this.setMoveStop();
     });
+    playRandomJump();
     // The animation will be running in place for 1 second
     this.setAnimation();
   }
@@ -180,6 +184,7 @@ export class Bot extends Actor {
   setMoveWinning() {
     this.moving = true;
     this.winning = true;
+    SOUNDS.victory.play();
     this.setMoveStop();
     this.setAnimation();
   }
@@ -187,9 +192,8 @@ export class Bot extends Actor {
   setMoveDying() {
     this.moving = true;
     this.dying = true;
-    //this.actions.delay(1000).callMethod(() => {
-      this.setMoveStop();
-    //});
+    SOUNDS.death.play();
+    this.setMoveStop();
     this.setAnimation();
   }
 
