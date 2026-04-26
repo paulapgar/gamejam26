@@ -48,8 +48,8 @@ export class TitleScene extends Scene {
     this.add(this.playButton);
 
     const levelNumbers = ["1", "2", "3", "4", "5"];
-    // 5 buttons × 40px wide + 4 × 10px gap = 240px total; center at x=400
-    const btnStartX = 400 - 120 + 20; // = 300, first button center
+    // 6 buttons × 50px spacing; first center = 400 - (5 * 50) / 2 = 275
+    const btnStartX = 275;
     levelNumbers.forEach((num, i) => {
       const levelBtn = new MyButton(
         vec(btnStartX + i * 50, 520),
@@ -69,6 +69,23 @@ export class TitleScene extends Scene {
       });
       this.add(levelBtn);
     });
+
+    const cliffBtn = new MyButton(
+      vec(btnStartX + 5 * 50, 520),
+      LEVEL_TILE_SPRITE.button1,
+      "?",
+    );
+    cliffBtn.setVisible();
+    cliffBtn.on("pointerup", () => {
+      _engine.goToScene("cliffhanger", {
+        destinationIn: new FadeInOut({
+          duration: 1000,
+          direction: "in",
+          color: Color.Black,
+        }),
+      });
+    });
+    this.add(cliffBtn);
 
     const titleBot = new Actor({
       pos: vec(150, 200),

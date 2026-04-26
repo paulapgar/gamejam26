@@ -21,7 +21,7 @@
 - [x] Switching between scenes / levels
 - [x] Next Level button if you win
 - [x] Restart Level button if you lose or just want to restart
-- [ ] background sprite graphics fill-in details and text labels
+- [x] background sprite graphics fill-in details and text labels
 - [x] Title Screen
 - [ ] Pause/Resume button
 - [x] Exit Level button (brings back to Title screen)
@@ -30,4 +30,4 @@
 - [ ] "pickup" and "putdown" item for bot action
 - [ ] Add Key tile to open door tiles
 - [ ] "Use" item for bot action
-- [ ] Cliffhanger screen for ending with Dopus ?
+- [x] Cliffhanger screen for ending with Dopus ?

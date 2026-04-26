@@ -47,6 +47,7 @@ for (const res of Object.values(RESOURCES)) {
 }
 for (const snd of Object.values(SOUNDS)) {
   loader.addResource(snd);
+  snd.volume = 0.75;
 }
 
 export const gameFontGreen = RESOURCES.fontRetroGaming.toFont({
@@ -124,6 +125,16 @@ const mainSheet = SpriteSheet.fromImageSource({
 });
 
 export const ANIM = {
+  redBotRunRight: Animation.fromSpriteSheetCoordinates({
+    spriteSheet: mainSheet,
+    durationPerFrameMs: 250,
+    frameCoordinates: [
+      { x: 0, y: 1 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+      { x: 2, y: 1 },
+    ],
+  }),
   botRunRight: Animation.fromSpriteSheetCoordinates({
     spriteSheet: mainSheet,
     durationPerFrameMs: 250,
@@ -183,6 +194,11 @@ export const ANIM = {
     spriteSheet: mainSheet,
     durationPerFrameMs: 250,
     frameCoordinates: [{ x: 0, y: 0 }],
+  }),
+  redBotStandRight: Animation.fromSpriteSheetCoordinates({
+    spriteSheet: mainSheet,
+    durationPerFrameMs: 250,
+    frameCoordinates: [{ x: 0, y: 1 }],
   }),
   botStandUp: Animation.fromSpriteSheetCoordinates({
     spriteSheet: mainSheet,
