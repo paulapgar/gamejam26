@@ -58,6 +58,7 @@ export class MyLevel extends Scene {
 
   instructionsBkg!: Actor;
   computeLabel!: Label;
+  agentDetail!: Label;
 
   tokenTray: Token[] = [];
   tokenTraySize: number = 0;
@@ -290,22 +291,20 @@ export class MyLevel extends Scene {
 
   onTrayTokenClicked(token: Token) {
     if (this.levelMode === "playing") {
-
-    const tokenNum = this.findTokenInTray(token);
-    if (tokenNum != -1) {
-      // remove the token from the tray
-      token.tokenType = "";
-      token.mode = "unused";
-      token.tokenCommands = [];
-      token.removeAllChildren();
-    } else {
-      console.log("Error: onTrayTokenClicked, token not found in tray");
+      const tokenNum = this.findTokenInTray(token);
+      if (tokenNum != -1) {
+        // remove the token from the tray
+        token.tokenType = "";
+        token.mode = "unused";
+        token.tokenCommands = [];
+        token.removeAllChildren();
+      } else {
+        console.log("Error: onTrayTokenClicked, token not found in tray");
+      }
     }
-  }
   }
 
   onFallingTokenClicked(token: Token) {
-    console.log("Falling token clicked:", token.tokenType);
     if (token.clickable === true) {
       let tokenNum = this.getAvailableTokenTrayIndex();
       console.log("Available token tray index:", tokenNum);
@@ -378,9 +377,13 @@ export class MyLevel extends Scene {
     }
   }
 
-  updateCompute(compute:number): void {
+  updateCompute(compute: number): void {
     this.computeLabel.text = `Compute Power (${compute} TOPS)`;
     this.myLevelData.numTokens = compute;
+  }
+
+  updateAgentDetail(name: string) {
+    this.agentDetail.text = `Gippity\nVer: 0.0.0.1\nExp: 0\n${name}`;
   }
 
   setLevelMode(
@@ -418,6 +421,7 @@ export class MyLevel extends Scene {
         // Swap out the restart button for a Next button
         this.restartLevelButton.setHidden();
         this.nextLevelButton.setVisible();
+        this.nextLevelButton.setEnabled();
         break;
       case "lost":
         // show losing message and button to restart level
@@ -451,6 +455,16 @@ export class MyLevel extends Scene {
       this.remove(token);
     }
     this.fallingTokens = [];
+
+    // remove buttons so they don't accumulate across level transitions
+    if (this.startLevelButton) this.startLevelButton.kill();
+    if (this.executePlanButton) this.executePlanButton.kill();
+    if (this.restartLevelButton) this.restartLevelButton.kill();
+    if (this.nextLevelButton) this.nextLevelButton.kill();
+    if (this.exitLevelButton) this.exitLevelButton.kill();
+
+    // remove per-activation labels
+    if (this.agentDetail) this.remove(this.agentDetail);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -562,12 +576,12 @@ export class MyLevel extends Scene {
     this.dropFallingToken = false;
     this.tokenTrayActiveOverlay.pos = vec(-100, -100); // move off screen until we have an active token running
 
-    this.myLevelData = context.data!;
+    this.myLevelData = { ...context.data! };
 
     // init the available tokens for this level
     this.tokenBucket = [...this.myLevelData.tokenList];
     this.updateCompute(this.myLevelData.numTokens);
-
+    //this.updateAgentDetail(this.myLevelData.name);
 
     this.bot.moving = false;
     this.bot.dying = false;
@@ -693,12 +707,12 @@ export class MyLevel extends Scene {
     });
     this.instructionsBkg.addChild(instructionsIconText);
 
-    const agentLabel = new Label({
-      text: `Gippity\nVer: 0.0.0.1\nExp: 0\n${this.myLevelData.name}`,
+    this.agentDetail = new Label({
+      text: `Gippity\nVer: 0.0.0.1\nExp: 0\n`,
       pos: vec(640, 40),
       font: gameFontWhiteLeft,
     });
-    this.add(agentLabel);
+    this.add(this.agentDetail);
 
     this.startLevelButton = new MyButton(
       vec(240, 460),
@@ -728,6 +742,7 @@ export class MyLevel extends Scene {
       LEVEL_TILE_SPRITE.button4,
       "Restart Level",
     );
+
     this.restartLevelButton.setVisible();
     this.restartLevelButton.setDisabled();
     this.restartLevelButton.on("pointerup", () => {
@@ -745,26 +760,28 @@ export class MyLevel extends Scene {
       "Next Level",
     );
     this.nextLevelButton.on("pointerup", () => {
-      if (this.myLevelData.nextLevel) {
-        if (LEVEL_DATA[this.myLevelData.nextLevel].levelType === "puzzle") {
-          this.engine.goToScene("level", {
-            sceneActivationData: LEVEL_DATA[this.myLevelData.nextLevel],
-            destinationIn: new FadeInOut({
-              duration: 1000,
-              direction: "in",
-              color: Color.Black,
-            }),
-          });
-        } else {
-          // Non puzzle levels could be a cutscene
-          if (this.myLevelData.nextLevel === "Title") {
-            this.engine.goToScene("title", {
+      if (this.levelMode === "won") {
+        if (this.myLevelData.nextLevel) {
+          if (LEVEL_DATA[this.myLevelData.nextLevel].levelType === "puzzle") {
+            this.engine.goToScene("level", {
+              sceneActivationData: LEVEL_DATA[this.myLevelData.nextLevel],
               destinationIn: new FadeInOut({
                 duration: 1000,
                 direction: "in",
                 color: Color.Black,
               }),
             });
+          } else {
+            // Non puzzle levels could be a cutscene
+            if (this.myLevelData.nextLevel === "Title") {
+              this.engine.goToScene("title", {
+                destinationIn: new FadeInOut({
+                  duration: 1000,
+                  direction: "in",
+                  color: Color.Black,
+                }),
+              });
+            }
           }
         }
       }
@@ -772,11 +789,15 @@ export class MyLevel extends Scene {
     this.add(this.nextLevelButton);
 
     this.exitLevelButton = new MyButton(
-      vec(17.5 * 40, 200),
+      vec(17.5 * 40, 260),
       LEVEL_TILE_SPRITE.button4,
-      "Exit to Menu",
+      "Exit to Title",
     );
+    this.exitLevelButton.setEnabled();
+    this.exitLevelButton.setVisible();
+
     this.exitLevelButton.on("pointerup", () => {
+      this.cleanLevel();
       this.engine.goToScene("title", {
         destinationIn: new FadeInOut({
           duration: 1000,

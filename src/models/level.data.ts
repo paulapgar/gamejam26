@@ -1,4 +1,4 @@
-import { ANIM, LEVEL_TILE_SPRITE, TOKEN_SPRITE } from "../resources";
+import { ANIM, TOKEN_SPRITE } from "../resources";
 import { LevelData } from "./level.model";
 
 export const LEVEL_DATA: Record<string, LevelData> = {
@@ -106,9 +106,9 @@ export const LEVEL_DATA: Record<string, LevelData> = {
       "tr",
       "fwd",
       "fwd2",
-      "fwd3",
+      "tr",
       "tl",
-      "fwd4",
+      "fwd",
       "fwd",
       "tr",
       "fwd",
@@ -181,7 +181,7 @@ export const LEVEL_DATA: Record<string, LevelData> = {
       " wwwwww   ",
     ],
     botFacing: "Right",
-    nextLevel: "Level 3",
+    nextLevel: "Level 4",
     tokenList: [
       "tl",
       "bck",

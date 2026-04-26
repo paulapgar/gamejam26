@@ -27,12 +27,12 @@ export default defineConfig({
     },
     build: {
         assetsInlineLimit: 0, // excalibur cannot handle inlined xml in prod mode
-        sourcemap: true,
+        sourcemap: false,
         // Vite uses rollup currently for prod builds so a separate config is needed
         // to keep vite from bundling ESM together with commonjs
         rollupOptions: {
             output: {
-                format: 'umd'
+                format: 'umd',
             }
         }
     }

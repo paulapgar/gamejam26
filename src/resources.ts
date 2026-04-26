@@ -15,6 +15,7 @@ import {
 export const RESOURCES = {
   spriteSheet: new ImageSource("./images/spritesheet.png"),
   background: new ImageSource("./images/background.png"),
+  titleBackground: new ImageSource("./images/title_background.png"),
   fontRetroGaming: new FontSource("./fonts/Retro Gaming.ttf", "Retro"),
 } as const; // the 'as const' is a neat typescript trick to get strong typing on your RESOURCE.
 // So when you type RESOURCE.Sword -> ImageSource
@@ -88,6 +89,7 @@ export const gameFontDarkGray = RESOURCES.fontRetroGaming.toFont({
 
 
 export const bkgSprite = Sprite.from(RESOURCES.background);
+export const titleBkgSprite = Sprite.from(RESOURCES.titleBackground);
 
 const mainSheet = SpriteSheet.fromImageSource({
   image: RESOURCES.spriteSheet,
@@ -234,6 +236,8 @@ export const LEVEL_TILE_SPRITE = {
   contextWindow4: mainSheet.getSprite(7, 7),
   button4: RESOURCES.spriteSheet.toSprite({ sourceView: { x: 0, y: 400, width: 160, height: 40 } }),
   button3: RESOURCES.spriteSheet.toSprite({ sourceView: { x: 0, y: 440, width: 120, height: 40 } }),
+  button2: RESOURCES.spriteSheet.toSprite({ sourceView: { x: 0, y: 480, width: 80, height: 40 } }),
+  button1: RESOURCES.spriteSheet.toSprite({ sourceView: { x: 0, y: 520, width: 40, height: 40 } }),
 };
 
 export const TOKEN_SPRITE = {

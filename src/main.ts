@@ -26,15 +26,7 @@ const game = new Engine({
 game.start('root', {
   loader, // Optional loader (but needed for loading images/sounds)
 }).then(() => {
-  // game.goToScene('title', {
-  //   destinationIn: new FadeInOut({
-  //     duration: 1000,
-  //     direction: 'in',
-  //     color: Color.Black
-  //   })
-  // });
-  game.goToScene('level', {
-    sceneActivationData: LEVEL_DATA["Level 1"],
+  game.goToScene('title', {
     destinationIn: new FadeInOut({
       duration: 1000,
       direction: 'in',

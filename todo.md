@@ -22,9 +22,9 @@
 - [x] Next Level button if you win
 - [x] Restart Level button if you lose or just want to restart
 - [ ] background sprite graphics fill-in details and text labels
-- [ ] Title Screen
+- [x] Title Screen
 - [ ] Pause/Resume button
-- [ ] Exit Level button (brings back to Title screen)
+- [x] Exit Level button (brings back to Title screen)
 - [x] Add shocker tile to kill robot if walk on it
 - [ ] Add Pressure Switch tile to create bridge
 - [ ] "pickup" and "putdown" item for bot action
