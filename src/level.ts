@@ -780,8 +780,8 @@ export class MyLevel extends Scene {
             });
           } else {
             // Non puzzle levels could be a cutscene
-            if (this.myLevelData.nextLevel === "Title") {
-              this.engine.goToScene("title", {
+            if (this.myLevelData.nextLevel === "Cliffhanger") {
+              this.engine.goToScene("cliffhanger", {
                 destinationIn: new FadeInOut({
                   duration: 1000,
                   direction: "in",

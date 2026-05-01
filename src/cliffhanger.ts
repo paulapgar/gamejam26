@@ -95,6 +95,14 @@ export class Cliffhanger extends Scene {
     this.blueBot.graphics.use(ANIM.botRunLeft);
     this.add(this.blueBot);
 
+    const leftMask = new Actor({ pos: vec(-100, SCREEN_HEIGHT / 2 + 60), z: 1 });
+    leftMask.graphics.use(new Rectangle({ width: 200, height: 100, color: Color.Black }));
+    this.add(leftMask);
+
+    const rightMask = new Actor({ pos: vec(SCREEN_WIDTH + 100, SCREEN_HEIGHT / 2 + 60), z: 1 });
+    rightMask.graphics.use(new Rectangle({ width: 200, height: 100, color: Color.Black }));
+    this.add(rightMask);
+
     const greenBar = new Actor({ pos: vec(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 40) });
     greenBar.graphics.use(new Rectangle({ width: 200, height: 80, color: Color.fromRGB(18, 56, 18) }));
     this.add(greenBar);

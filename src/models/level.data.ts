@@ -346,7 +346,7 @@ export const LEVEL_DATA: Record<string, LevelData> = {
       "wwwwwwwwww",
     ],
     botFacing: "Left",
-    nextLevel: "Title",
+    nextLevel: "Cliffhanger",
     tokenList: [
       "tr",
       "fwd",
@@ -412,6 +412,18 @@ export const LEVEL_DATA: Record<string, LevelData> = {
     ],
     instructionIcon: ANIM["shockTile1"],
     instructionIconText: "Zappy Tower",
+  },
+  "Cliffhanger": {
+    name: "Cliffhanger",
+    levelType: "cutscene",
+    charMap: [],
+    botFacing: "Up",
+    nextLevel: "",
+    tokenList: [],
+    numTokens: 0,
+    instructionText: [],
+    instructionIcon: TOKEN_SPRITE["unknown"],
+    instructionIconText: "",
   },
 };
 
